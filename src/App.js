@@ -1,49 +1,104 @@
-import React from 'react';
+import React from "react";
 import {
   BrowserRouter as Router,
   Route,
   Switch,
   Link,
-  useRouteMatch
-} from 'react-router-dom'
+  useRouteMatch,
+  useParams
+} from "react-router-dom";
 
-import './App.css';
+import "./App.css";
 
-const About = () =>{
-  return <h1>This is a About page</h1>
-}
+const MixComponent = props => {
+  const { fruit } = useParams();
+  return (
+    <div>
+      {" "}
+      <h1>{`${fruit}`}</h1>
+      {props.children}
+    </div>
+  );
+};
 
-const Topics = (props) =>{
-  let match = useRouteMatch();
-  console.log(props,'match:',match)
-  return <div>
-    <h1>This is a Topics page</h1>
-  </div>
-}
+const Type = () => {
+  const { carType } = useParams();
+  return <h2>{carType}</h2>;
+};
 
+const Tacos = props => {
+  const { path, url } = useRouteMatch();
+  const { fruit } = useParams();
+  console.log(path, url);
+  return (
+    <div>
+      <h1>{`${fruit}`}</h1>
+    </div>
+  );
+};
+const NoMatch = () => {
+  const match = useRouteMatch();
+  return (
+    <div>
+      <h2>{`The ${match.url} page is lost ...`}</h2>
+    </div>
+  );
+};
+const routeConfig = [
+  {
+    path: "/sandwiches",
+    component: MixComponent
+  },
+  {
+    path: "/tacos",
+    component: MixComponent,
+    routes: [
+      {
+        path: "/tacos/:carType",
+        component: Type
+      }
+    ]
+  }
+];
 function App() {
   return (
     <div className="App">
-    <Router>
-      <ul>
-      <li>
-            <Link to="/">Home</Link>
+      <Router>
+        <ul>
+          <li>
+            <Link to={"/tacos"}>Tacos</Link>
           </li>
-        <li>
-          <Link to={'/about'}>About</Link>
-        </li>
-        <li>
-          <Link to={'/topics'}>Topics</Link>
-        </li>
-      </ul>
-    <Switch>
-      <Route path={'/about'} component={About}/>
-      <Route path={'/topics'} component={Topics}></Route>
-      <Route path='/'>
-        <h1>This is a home page</h1>
-      </Route>
-    </Switch>
-    </Router>
+          <li>
+            <Link to={"/sandwiches"}>Sandwiches</Link>
+          </li>
+          <li>
+            <Link to={"/tacos/bus"}>bus</Link>
+          </li>
+          <li>
+            <Link to={"/tacos/cart"}>cart</Link>
+          </li>
+        </ul>
+        <Switch>
+          {routeConfig.map(route => {
+            return (
+              <Route path={route.path} component={route.component}>
+                {route.routes && (
+                  <Switch>
+                    {route.routes.map(subRoute => {
+                      return (
+                        <Route
+                          path={subRoute}
+                          component={subRoute.component}
+                        ></Route>
+                      );
+                    })}
+                  </Switch>
+                )}
+              </Route>
+            );
+          })}
+        </Switch>
+      </Router>
     </div>
   );
 }
